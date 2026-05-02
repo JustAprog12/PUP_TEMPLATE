@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PUP Vendor Portal - Access</title>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet">
+    <style>
+        :root {
+            --pup-maroon: #800000;
+            --pup-gold: #f2c413;
+            --text-main: #1a1a1a;
+            --text-muted: #666;
+            --border-color: #eeeeee;
+        }
+
+        body {
+            margin: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-image: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url('image_a55116.jpg');
+            background-position: center;
+            background-size: cover;
+            background-attachment: fixed;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        .navbar {
+            background-color: var(--pup-maroon);
+            color: white;
+            padding: 10px 5%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+        }
+
+        .navbar h3 { margin: 0; letter-spacing: 1px; }
+
+        .nav-links a {
+            color: white;
+            text-decoration: none;
+            margin-left: 20px;
+            font-size: 0.9rem;
+            font-weight: bold;
+        }
+
+        .container {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 40px 20px;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.98);
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.4);
+            width: 100%;
+            max-width: 450px;
+            border-top: 6px solid var(--pup-maroon);
+        }
+
+        .tab-group {
+            display: flex;
+            margin-bottom: 30px;
+            border-bottom: 2px solid var(--border-color);
+        }
+
+        .tab {
+            flex: 1;
+            text-align: center;
+            padding: 10px;
+            cursor: pointer;
+            font-weight: bold;
+            color: var(--text-muted);
+            transition: 0.3s;
+        }
+
+        .tab.active {
+            color: var(--pup-maroon);
+            border-bottom: 3px solid var(--pup-maroon);
+        }
+
+        .form-section { display: none; }
+        .form-section.active { display: block; }
+
+        label {
+            font-size: 0.8rem; 
+            font-weight: bold; 
+            color: #666;
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 12px 15px;
+            margin-bottom: 20px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            font-size: 1rem;
+            box-sizing: border-box;
+            display: block;
+        }
+
+        .photo-upload {
+            border: 2px dashed #ccc;
+            border-radius: 8px;
+            padding: 15px;
+            text-align: center;
+            margin-bottom: 20px;
+            cursor: pointer;
+        }
+
+        button {
+            width: 100%;
+            padding: 14px;
+            background-color: var(--pup-maroon);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        button:hover { background-color: #600000; transform: translateY(-2px); }
+
+        .consumer-notice {
+            margin-top: 25px;
+            text-align: center;
+            padding: 15px;
+            background: #fff9f9;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        .consumer-notice a { color: var(--pup-maroon); font-weight: bold; text-decoration: none; }
+    </style>
+</head>
+<body>
+
+<div class="navbar">
+    <h3>PUP Vendor</h3>
+    <div class="nav-links">
+        <a href="index.html">Home</a>
+        <a href="register.html">Access</a>
+        <a href="faq.html">FAQ</a>
+    </div>
+</div>
+
+<div class="container">
+    <div class="card">
+        <div class="tab-group">
+            <div class="tab active" onclick="switchTab('login')">Stall Login</div>
+            <div class="tab" onclick="switchTab('register')">New Registration</div>
+        </div>
+
+        <!-- LOGIN FORM -->
+        <div id="login-form" class="form-section active">
+            <label>OWNER EMAIL</label>
+            <input type="email" placeholder="Enter your email">
+            
+            <label>PASSWORD</label>
+            <input type="password" placeholder="••••••••">
+            
+            <button onclick="handleAccess('login')">Login to Dashboard</button>
+        </div>
+
+        <!-- REGISTER FORM -->
+        <div id="register-form" class="form-section">
+            <label>STALL NAME</label>
+            <input type="text" placeholder="e.g. Sisigan Ni Man Bento">
+
+            <label>OWNER EMAIL</label>
+            <input type="email" placeholder="Enter your email">
+            
+            <label>CATEGORY</label>
+            <select>
+                <option>Food</option>
+                <option>Vanity</option>
+                <option>School Supplies</option>
+            </select>
+
+            <label>STALL PHOTO</label>
+            <div class="photo-upload" onclick="document.getElementById('fileInput').click()">
+                <span class="material-icons-outlined" style="color: var(--pup-maroon);">add_a_photo</span>
+                <p style="margin:5px 0 0; font-size:0.75rem;">Upload Store Front</p>
+                <input type="file" id="fileInput" style="display:none;" accept="image/*">
+            </div>
+
+            <label>OWNER PASSWORD</label>
+            <input type="password" placeholder="Create a password">
+            
+            <button onclick="handleAccess('register')">Register Stall</button>
+        </div>
+
+        <div class="consumer-notice">
+            Just looking for a stall? <br>
+            <a href="index.html">Continue as Consumer (Guest)</a>
+        </div>
+    </div>
+</div>
+
+<script>
+    function switchTab(type) {
+        const tabs = document.querySelectorAll('.tab');
+        const forms = document.querySelectorAll('.form-section');
+        
+        tabs.forEach(t => t.classList.remove('active'));
+        forms.forEach(f => f.classList.remove('active'));
+        
+        if(type === 'login') {
+            tabs[0].classList.add('active');
+            document.getElementById('login-form').classList.add('active');
+        } else {
+            tabs[1].classList.add('active');
+            document.getElementById('register-form').classList.add('active');
+        }
+    }
+
+    function handleAccess(type) {
+        alert(type === 'login' ? 'Logging in as Stall Owner...' : 'Submitting registration for approval...');
+    }
+</script>
+
+</body>
+</html>

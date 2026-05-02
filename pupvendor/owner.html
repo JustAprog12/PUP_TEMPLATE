@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PUP Vendor Portal - Owner Management</title>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet">
+    <style>
+        :root {
+            --pup-maroon: #800000;
+            --pup-gold: #f2c413;
+            --text-main: #1a1a1a;
+            --text-muted: #666;
+            --border-color: #eeeeee;
+        }
+
+        body {
+            margin: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #ffffff;
+            color: var(--text-main);
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        .navbar {
+            background-color: var(--pup-maroon);
+            color: white;
+            padding: 10px 5%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .navbar h3 { margin: 0; letter-spacing: 1px; }
+
+        .nav-links button {
+            color: white;
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: bold;
+            background: none;
+            border: none;
+            cursor: pointer;
+            transition: color 0.3s;
+        }
+
+        .nav-links button:hover { color: var(--pup-gold); }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 60px 20px;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        header h1 {
+            color: var(--pup-maroon);
+            font-size: 3.5rem;
+            margin: 0;
+            font-weight: 700;
+        }
+
+        header p {
+            color: var(--text-muted);
+            font-size: 1.1rem;
+            margin: 10px 0 40px 0;
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+
+        .dash-card {
+            background: #fff;
+            padding: 25px;
+            border-radius: 15px;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        }
+
+        .dash-card h3 { 
+            margin-top: 0; 
+            color: var(--pup-maroon); 
+            font-size: 0.9rem; 
+            text-transform: uppercase; 
+            border-bottom: 1px solid #f0f0f0; 
+            padding-bottom: 10px; 
+            margin-bottom: 15px;
+        }
+
+        .stat-row { display: flex; justify-content: space-between; margin-bottom: 12px; font-size: 0.95rem; }
+        .stat-val { font-weight: bold; color: var(--pup-maroon); }
+
+        .dropdown-trigger {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px;
+            background: #fafafa;
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            cursor: pointer;
+            margin-top: 20px;
+        }
+
+        .dropdown-trigger h2 {
+            color: var(--pup-maroon);
+            font-size: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            margin: 0;
+        }
+
+        .dropdown-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.5s ease-out;
+            background: #fff;
+            border-radius: 0 0 12px 12px;
+        }
+
+        .dropdown-content.open {
+            max-height: 2000px; 
+            padding: 25px;
+            border: 1px solid var(--border-color);
+            border-top: none;
+            margin-top: -5px;
+        }
+
+        label { font-size: 0.8rem; font-weight: bold; color: #666; display: block; margin-bottom: 8px; }
+        input, textarea, select {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 20px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            box-sizing: border-box;
+            font-family: inherit;
+        }
+
+        .btn-action {
+            width: 100%;
+            padding: 14px;
+            background: var(--pup-maroon);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .btn-action:hover { background: #600000; transform: translateY(-2px); }
+
+        .category-nav { display: flex; gap: 10px; margin-bottom: 20px; }
+        .cat-btn {
+            padding: 8px 16px;
+            border: 1px solid var(--pup-maroon);
+            background: none;
+            color: var(--pup-maroon);
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        .cat-btn.active { background: var(--pup-maroon); color: white; }
+
+        .stall-item {
+            display: flex;
+            align-items: center;
+            padding: 15px;
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            margin-bottom: 10px;
+            animation: fadeIn 0.3s ease;
+        }
+        .stall-img { margin-right: 15px; color: var(--pup-maroon); }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @media (max-width: 768px) { .dashboard-grid { grid-template-columns: 1fr; } }
+    </style>
+</head>
+<body>
+
+<div class="navbar">
+    <h3>PUP Vendor</h3>
+    <div class="nav-links">
+        <button onclick="logout()">Logout</button>
+    </div>
+</div>
+
+<div class="container">
+    <header>
+        <h1>Management.</h1>
+        <p>Monitor performance and update your stall credentials.</p>
+    </header>
+
+    <div class="dashboard-grid">
+        <div class="dash-card">
+            <h3>Stall Analytics</h3>
+            <div class="stat-row"><span>Monthly Views</span> <span class="stat-val">1,240</span></div>
+            <div class="stat-row"><span>Student Rating</span> <span class="stat-val">9.8/10</span></div>
+            <button class="btn-action" style="background:#2e7d32; margin-top: 10px;">View All Feedback</button>
+        </div>
+
+        <div class="dash-card">
+            <h3>Account Summary</h3>
+            <div class="stat-row"><span>Status</span> <span class="stat-val" style="color:green">Verified</span></div>
+            <div class="stat-row"><span>Category</span> <span class="stat-val">Food</span></div>
+            <p style="font-size: 0.8rem; color: #777; margin-top: 15px;">Your stall is actively appearing in the campus directory.</p>
+        </div>
+    </div>
+
+    <div class="dropdown-trigger" onclick="toggleSection('edit-dropdown')">
+        <h2>Update Stall Profile</h2>
+        <span class="material-icons-outlined">expand_more</span>
+    </div>
+    <div id="edit-dropdown" class="dropdown-content">
+        <label>STALL NAME</label>
+        <input type="text" value="Sisigan Ni Man Bento">
+        <label>CATEGORY</label>
+        <select><option selected>Food</option><option>Vanity</option><option>School Supplies</option></select>
+        <label>STALL DESCRIPTION</label>
+        <textarea rows="3">Best-selling sisig with egg. Located in the North Wing.</textarea>
+        <button class="btn-action">Save Profile Changes</button>
+    </div>
+
+    <div class="dropdown-trigger" onclick="toggleSection('browse-dropdown')">
+        <h2>Browse Campus Stalls</h2>
+        <span class="material-icons-outlined">expand_more</span>
+    </div>
+    <div id="browse-dropdown" class="dropdown-content">
+        <div class="category-nav">
+            <button class="cat-btn active" onclick="filterStalls('School Supplies')">School Supplies</button>
+            <button class="cat-btn" onclick="filterStalls('Vanity')">Vanity</button>
+            <button class="cat-btn" onclick="filterStalls('Food')">Food</button>
+        </div>
+        <div id="stall-list">
+            <!-- Content loaded by JS -->
+        </div>
+    </div>
+</div>
+
+<script>
+    const stallData = {
+        'School Supplies': `
+            <div class="stall-item">
+                <span class="material-icons-outlined stall-img">edit_note</span>
+                <div><strong>PUP Stationery Hub</strong><p style="margin:2px 0; font-size:0.8rem; color:#666;">Stall 1 • 9.5 Rating</p></div>
+            </div>
+            <div class="stall-item">
+                <span class="material-icons-outlined stall-img">print</span>
+                <div><strong>Quick Print & Supplies</strong><p style="margin:2px 0; font-size:0.8rem; color:#666;">Stall 2 • 8.2 Rating</p></div>
+            </div>`,
+        'Vanity': `
+            <div class="stall-item">
+                <span class="material-icons-outlined stall-img" style="color:#c2185b">checkroom</span>
+                <div><strong>Style & Glow</strong><p style="margin:2px 0; font-size:0.8rem; color:#666;">Stall 5 • 9.0 Rating</p></div>
+            </div>`,
+        'Food': `
+            <div class="stall-item">
+                <span class="material-icons-outlined stall-img" style="color:#388e3c">restaurant</span>
+                <div><strong>Sisigan Ni Man Bento</strong><p style="margin:2px 0; font-size:0.8rem; color:#666;">Stall 3 • 9.8 Rating</p></div>
+            </div>`
+    };
+
+    function toggleSection(id) {
+        document.getElementById(id).classList.toggle('open');
+    }
+
+    function filterStalls(category) {
+        // Update active button
+        const buttons = document.querySelectorAll('.cat-btn');
+        buttons.forEach(btn => btn.classList.remove('active'));
+        event.target.classList.add('active');
+        
+        // Update list
+        document.getElementById('stall-list').innerHTML = stallData[category];
+    }
+
+    function logout() {
+        if(confirm("Logout from dashboard?")) window.location.href = 'index.html';
+    }
+
+    // Load initial list
+    filterStalls('School Supplies');
+</script>
+
+</body>
+</html>
