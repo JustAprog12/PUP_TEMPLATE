@@ -1,0 +1,451 @@
+<?php
+    require 'db_connect.php';
+    session_start();
+    
+    // Set default role if not logged in
+    if (!isset($_SESSION['role'])) {
+        $_SESSION['role'] = 'guest'; 
+    }
+  
+    // Determine the homepage based on user session role
+    $home_link = 'HomePageUnRegistered.php';
+    if ($_SESSION['role'] === 'vendor') {
+        $home_link = 'HomePageVendor.php';
+    } elseif ($_SESSION['role'] === 'user') {
+        $home_link = 'HomePageRegistered.php';
+    }
+?>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>PUP Vendor – Reviews</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=Playfair+Display:wght@700&display=swap" rel="stylesheet"/>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: #fff;
+      color: #1a1a1a;
+    }
+
+    nav {
+      background: #8b1a1a;
+      height: 48px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 2rem;
+    }
+
+    nav .logo { color: #fff; font-weight: 600; font-size: 0.95rem; }
+    .nav-links { display: flex; gap: 1.5rem; }
+    nav a { color: rgba(255,255,255,0.8); text-decoration: none; font-size: 0.88rem; }
+    nav a:hover { color: #fff; }
+
+    .container { max-width: 1200px; margin: 0 auto; padding: 3rem 2rem; }
+
+    h1 {
+      font-family: 'Playfair Display', serif;
+      font-size: 2.8rem;
+      color: #8b1a1a;
+    }
+
+    .subtitle { color: #888; margin-top: 0.4rem; font-size: 0.95rem; }
+
+    /* SUMMARY CARDS */
+    .summary {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+      margin-top: 2rem;
+    }
+
+    .card {
+      border: 1px solid #e0e0e0;
+      border-radius: 8px;
+      padding: 1.3rem;
+    }
+
+    .card-title {
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: #8b1a1a;
+      font-weight: 600;
+      border-bottom: 1px solid #e0e0e0;
+      padding-bottom: 0.7rem;
+      margin-bottom: 1rem;
+    }
+
+    .card-row {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.9rem;
+      padding: 0.3rem 0;
+    }
+
+    .card-row span:last-child { font-weight: 600; color: #8b1a1a; }
+
+    /* FILTERS */
+    .section-label {
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: #8b1a1a;
+      font-weight: 600;
+      margin-top: 2.5rem;
+      margin-bottom: 1rem;
+    }
+
+    .chips { display: flex; gap: 0.5rem; margin-bottom: 1.2rem; }
+
+    .chip {
+      border: 1px solid #ddd;
+      border-radius: 20px;
+      padding: 0.3rem 0.9rem;
+      font-size: 0.8rem;
+      cursor: pointer;
+      background: #fff;
+      font-family: 'DM Sans', sans-serif;
+      transition: all 0.15s;
+    }
+
+    .chip:hover, .chip.active {
+      background: #8b1a1a;
+      border-color: #8b1a1a;
+      color: #fff;
+    }
+
+    /* REVIEW CARDS */
+    .reviews-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 1rem;
+    }
+
+    .review-card {
+      border: 1px solid #e0e0e0;
+      border-radius: 8px;
+      padding: 1.2rem;
+      transition: border-color 0.2s;
+    }
+
+    .review-card:hover { border-color: #8b1a1a; }
+
+    .badge {
+      display: inline-block;
+      background: #8b1a1a;
+      color: #fff;
+      font-size: 0.72rem;
+      font-weight: 600;
+      padding: 0.2rem 0.6rem;
+      border-radius: 4px;
+      margin-bottom: 0.7rem;
+    }
+
+    .stars { display: flex; gap: 2px; margin-bottom: 0.6rem; }
+
+    .star {
+      width: 12px; height: 12px;
+      background: #2d6a2d;
+      clip-path: polygon(50% 0%,61% 35%,98% 35%,68% 57%,79% 91%,50% 70%,21% 91%,32% 57%,2% 35%,39% 35%);
+    }
+    .star.empty { background: #ddd; }
+
+    .review-text {
+      font-size: 0.88rem;
+      color: #666;
+      line-height: 1.6;
+      font-style: italic;
+    }
+
+    .review-meta {
+      margin-top: 0.9rem;
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.78rem;
+      color: #999;
+    }
+
+    .review-meta strong { color: #1a1a1a; }
+
+    /* FORM */
+    .form-section {
+      margin-top: 2.5rem;
+      border: 1px solid #e0e0e0;
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    .form-header {
+      background: #f9f9f9;
+      padding: 1rem 1.3rem;
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: #8b1a1a;
+      font-weight: 600;
+      border-bottom: 1px solid #e0e0e0;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .form-body { padding: 1.5rem; display: none; }
+    .form-body.open { display: block; }
+
+    .form-body label { font-size: 0.8rem; color: #888; display: block; margin-bottom: 0.3rem; }
+
+    .form-body input,
+    .form-body select,
+    .form-body textarea {
+      width: 100%;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      padding: 0.5rem 0.8rem;
+      font-size: 0.9rem;
+      font-family: 'DM Sans', sans-serif;
+      margin-bottom: 1rem;
+      outline: none;
+    }
+
+    .form-body input:focus,
+    .form-body textarea:focus { border-color: #8b1a1a; }
+
+    .btn {
+      background: #8b1a1a;
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      padding: 0.6rem 1.2rem;
+      font-size: 0.88rem;
+      font-family: 'DM Sans', sans-serif;
+      cursor: pointer;
+      width: 100%;
+    }
+
+    .btn:hover { background: #a82020; }
+
+    @media (max-width: 600px) {
+      .summary { grid-template-columns: 1fr; }
+      h1 { font-size: 2rem; }
+    }
+  </style>
+</head>
+<body>
+
+<nav>
+  <div class="logo">PUP ★ All-Stop-Shops</div>
+  <div class="nav-links">
+    <a href="<?php echo htmlspecialchars($home_link); ?>">Home</a>
+    <a href="AboutUs.php">About Us</a>
+  </div>
+</nav>
+
+<div class="container">
+  <h1>Reviews.</h1>
+  <p class="subtitle">What students say about campus vendors.</p>
+
+  <!-- SUMMARY -->
+  <div class="summary">
+    <div class="card">
+      <div class="card-title">Review Summary</div>
+      <div class="card-row"><span>Total Reviews</span><span>67</span></div>
+      <div class="card-row"><span>Average Rating</span><span>9.1/10</span></div>
+      <div class="card-row"><span>5-Star Reviews</span><span>43</span></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Top Rated This Month</div>
+      <div class="card-row"><span>🏆 Chickenlicious (Stall 22)</span><span>9.8/10</span></div>
+      <div class="card-row"><span>🥈 Kape Kuripot (Stall 08)</span><span>9.5/10</span></div>
+      <div class="card-row"><span>🥉 PrintBest (Stall 08)</span><span>9.3/10</span></div>
+    </div>
+  </div>
+
+  <!-- REVIEWS -->
+  <div class="section-label">Browse by Category</div>
+  <div class="chips">
+    <button class="chip active" onclick="filter('all', this)">All</button>
+    <button class="chip" onclick="filter('food', this)">Food</button>
+    <button class="chip" onclick="filter('print', this)">Print Services</button>
+    <button class="chip" onclick="filter('supplies', this)">School Supplies</button>
+    <button class="chip" onclick="filter('others', this)">Others</button>
+  </div>
+
+  <div class="reviews-grid" id="grid">
+    <div class="review-card" data-cat="food">
+      <div class="badge">Stall 22 · Chickenlicious · 9.8/10</div>
+      <div class="stars"><div class="star"></div><div class="star"></div><div class="star"></div><div class="star"></div><div class="star"></div></div>
+      <p class="review-text">"Sulit na sulit! The fried chicken meals are filling and very student-friendly. Best sa campus!"</p>
+      <div class="review-meta"><strong>Ana R.</strong><span>April 2026</span></div>
+    </div>
+    <div class="review-card" data-cat="food">
+      <div class="badge">Stall 08 · Kape Kuripot · 9.5/10</div>
+      <div class="stars"><div class="star"></div><div class="star"></div><div class="star"></div><div class="star"></div><div class="star"></div></div>
+      <p class="review-text">"Perfect for early morning classes. Coffee is affordable and actually good. My go-to every day!"</p>
+      <div class="review-meta"><strong>Carlo M.</strong><span>April 2026</span></div>
+    </div>
+    <div class="review-card" data-cat="food">
+      <div class="badge">Stall 13 · Fudbook Kitchenette · 9.2/10</div>
+      <div class="stars"><div class="star"></div><div class="star"></div><div class="star"></div><div class="star"></div><div class="star"></div></div>
+      <p class="review-text">"Love the sisig rice here! The flavored drinks are great too. Solid choice for merienda or lunch."</p>
+      <div class="review-meta"><strong>Bea S.</strong><span>April 2026</span></div>
+    </div>
+    <div class="review-card" data-cat="food">
+      <div class="badge">Stall 18 · Liza's Eatery · 8.9/10</div>
+      <div class="stars"><div class="star"></div><div class="star"></div><div class="star"></div><div class="star"></div><div class="star empty"></div></div>
+      <p class="review-text">"Shawarma is a must-try! Rice meals are okay naman, masaya lang laging maraming tao."</p>
+      <div class="review-meta"><strong>Marco T.</strong><span>March 2026</span></div>
+    </div>
+    <div class="review-card" data-cat="food">
+      <div class="badge">Stall 17 · Waffle Time · 9.0/10</div>
+      <div class="stars"><div class="star"></div><div class="star"></div><div class="star"></div><div class="star"></div><div class="star"></div></div>
+      <p class="review-text">"Great merienda spot! Waffles are hot, fresh, and very sulit. Perfect between classes."</p>
+      <div class="review-meta"><strong>Lea P.</strong><span>March 2026</span></div>
+    </div>
+    <div class="review-card" data-cat="food">
+      <div class="badge">Stall 09 · Potato Corner · 8.7/10</div>
+      <div class="stars"><div class="star"></div><div class="star"></div><div class="star"></div><div class="star"></div><div class="star empty"></div></div>
+      <p class="review-text">"Classic Potato Corner flavors! BBQ is the best. Gets sold out fast so come early."</p>
+      <div class="review-meta"><strong>James T.</strong><span>March 2026</span></div>
+    </div>
+    <div class="review-card" data-cat="print">
+      <div class="badge">Stall 08 · PrintBest · 9.3/10</div>
+      <div class="stars"><div class="star"></div><div class="star"></div><div class="star"></div><div class="star"></div><div class="star"></div></div>
+      <p class="review-text">"Super mabilis mag-print dito! Rush ID services din available. Lifesaver during enrollment season."</p>
+      <div class="review-meta"><strong>Maria L.</strong><span>April 2026</span></div>
+    </div>
+    <div class="review-card" data-cat="print">
+      <div class="badge">Stall 09 · Blessings Services · 9.1/10</div>
+      <div class="stars"><div class="star"></div><div class="star"></div><div class="star"></div><div class="star"></div><div class="star"></div></div>
+      <p class="review-text">"Mabait yung owner at mabilis mag-scan at mag-print. Prices are reasonable talaga."</p>
+      <div class="review-meta"><strong>Sofia G.</strong><span>March 2026</span></div>
+    </div>
+    <div class="review-card" data-cat="print">
+      <div class="badge">Stall 10 · JCM Printing Services · 8.8/10</div>
+      <div class="stars"><div class="star"></div><div class="star"></div><div class="star"></div><div class="star"></div><div class="star empty"></div></div>
+      <p class="review-text">"Reliable printing stall. Never had issues with the output quality. Good for thesis printing!"</p>
+      <div class="review-meta"><strong>Nico A.</strong><span>February 2026</span></div>
+    </div>
+    <div class="review-card" data-cat="supplies">
+      <div class="badge">Stall 01 · School Supplies · 8.6/10</div>
+      <div class="stars"><div class="star"></div><div class="star"></div><div class="star"></div><div class="star"></div><div class="star empty"></div></div>
+      <p class="review-text">"Complete school supplies! From ballpen to bond paper, meron lahat. Very convenient."</p>
+      <div class="review-meta"><strong>Dana R.</strong><span>April 2026</span></div>
+    </div>
+    <div class="review-card" data-cat="others">
+      <div class="badge">Stall 15 · FlickTure Studios · 9.4/10</div>
+      <div class="stars"><div class="star"></div><div class="star"></div><div class="star"></div><div class="star"></div><div class="star"></div></div>
+      <p class="review-text">"Photobooth is so fun! Sobrang cute ng props and the prints are high quality. Perfect for org events."</p>
+      <div class="review-meta"><strong>Ella M.</strong><span>April 2026</span></div>
+    </div>
+    <div class="review-card" data-cat="others">
+      <div class="badge">Stall 02 · SariSip & Crunch · 8.5/10</div>
+      <div class="stars"><div class="star"></div><div class="star"></div><div class="star"></div><div class="star"></div><div class="star empty"></div></div>
+      <p class="review-text">"Good snack variety and the drinks are refreshing. Nice quick stop before class starts."</p>
+      <div class="review-meta"><strong>Ryan P.</strong><span>March 2026</span></div>
+    </div>
+  </div>
+
+  <!-- LEAVE A REVIEW -->
+  <div class="form-section">
+    <div class="form-header" onclick="toggleForm()">
+      <span>Leave a Review</span><span id="arrow">⌄</span>
+    </div>
+    <div class="form-body" id="form-body">
+      <label>Your Name</label>
+      <input type="text" placeholder="e.g. Juan dela Cruz"/>
+      <label>Vendor / Stall</label>
+      <select>
+        <optgroup label="Food">
+          <option>Stall 13 – Fudbook Kitchenette</option>
+          <option>Stall 14 – Flavored Drinks & Groceries</option>
+          <option>Stall 15 – Puroy's Eatery</option>
+          <option>Stall 16 – Flavors of Lagoon</option>
+          <option>Stall 17 – Waffle Time</option>
+          <option>Stall 18 – Liza's Eatery</option>
+          <option>Stall 19 – J.I.B. Food and Beverage</option>
+          <option>Stall 20 – 4th J</option>
+          <option>Stall 21 – Cup of Tea</option>
+          <option>Stall 22 – Chickenlicious</option>
+          <option>Stall 23 – Mirese Ann</option>
+          <option>Stall 24 – David's Wings</option>
+          <option>Stall 25 – Prutas Con Yelo</option>
+          <option>Stall 26 – Don Jon</option>
+          <option>Stall 27 – Varda</option>
+          <option>Stall 02 – SariSip & Crunch</option>
+          <option>Stall 03 – Trinas @ PUP</option>
+          <option>Stall 06 – Pepper's Food Stall</option>
+          <option>Stall 08 – Kape Kuripot</option>
+          <option>Stall 09 – Potato Corner</option>
+          <option>Stall 11 – Cuadro De J</option>
+          <option>Stall 12 – Go! Go! Healthy</option>
+        </optgroup>
+        <optgroup label="Print Services">
+          <option>Stall 08 – PrintBest</option>
+          <option>Stall 09 – Blessings Services</option>
+          <option>Stall 10 – JCM Printing Services</option>
+          <option>Stall 04 – KAKZ BYTE</option>
+        </optgroup>
+        <optgroup label="School Supplies">
+          <option>Stall 01 – School Supplies</option>
+          <option>Stall 11 – School Supplies and Print Services</option>
+        </optgroup>
+        <optgroup label="Others">
+          <option>Stall 15 – FlickTure Studios</option>
+          <option>Stall 22 – PUPreneuers</option>
+          <option>Stall 16 – Anik-anik</option>
+        </optgroup>
+      </select>
+      <label>Rating (1–10)</label>
+      <input type="number" min="1" max="10" placeholder="e.g. 9"/>
+      <label>Your Review</label>
+      <textarea rows="3" placeholder="Share your experience..."></textarea>
+      <button class="btn" type="button" onclick="handleReviewSubmit()">Submit Review</button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  const isGuest = <?php echo json_encode($_SESSION['role'] === 'guest'); ?>;
+
+  function requireAuth() {
+    if (isGuest) {
+      alert('Please sign up or sign in first to leave a review.');
+      window.location.href = 'Registration.php';
+      return false;
+    }
+    return true;
+  }
+  function filter(cat, el) {
+    document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+    el.classList.add('active');
+    document.querySelectorAll('.review-card').forEach(card => {
+      card.style.display = (cat === 'all' || card.dataset.cat === cat) ? '' : 'none';
+    });
+  }
+
+  function toggleForm() {
+    if (!requireAuth()) {
+      return;
+    }
+    const body = document.getElementById('form-body');
+    const arrow = document.getElementById('arrow');
+    body.classList.toggle('open');
+    arrow.textContent = body.classList.contains('open') ? '⌃' : '⌄';
+  }
+
+  function handleReviewSubmit() {
+    if (!requireAuth()) {
+      return;
+    }
+    alert('Review submitted! Salamat!!');
+  }
+</script>
+</body>
+</html>
